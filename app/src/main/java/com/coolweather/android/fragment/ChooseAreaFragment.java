@@ -1,10 +1,8 @@
 package com.coolweather.android.fragment;
 
 import android.Manifest;
-import android.app.ProgressDialog;
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +44,7 @@ import pub.devrel.easypermissions.EasyPermissions;
  * @sub
  */
 
-public class ChooseAreaFragment extends Fragment implements EasyPermissions.PermissionCallbacks{
+public class ChooseAreaFragment extends Fragment {
 
     private static final int LEVEL_PROVINCE = 0;
     private static final int LEVEL_CITY     = 1;
@@ -73,10 +71,6 @@ public class ChooseAreaFragment extends Fragment implements EasyPermissions.Perm
 
     private Province selectedProvince;
     private City     selectedCity;
-
-    String PERMS = Manifest.permission.INTERNET;
-
-    public static final int PICKER_PERM = 321;
 
     @Nullable
     @Override
@@ -122,18 +116,8 @@ public class ChooseAreaFragment extends Fragment implements EasyPermissions.Perm
                 }
             }
         });
+        queryProvinces();
 
-        checkPermission();
-    }
-
-    @AfterPermissionGranted(PICKER_PERM)
-    private void checkPermission() {
-        if (EasyPermissions.hasPermissions(getContext(), PERMS)) {
-            queryProvinces();
-        } else {
-            EasyPermissions.requestPermissions(this, "申请权限",
-                    PICKER_PERM, PERMS);
-        }
     }
 
     private void queryProvinces() {
@@ -175,7 +159,7 @@ public class ChooseAreaFragment extends Fragment implements EasyPermissions.Perm
             currentLevel = LEVEL_CITY;
         } else {
             int provinceCode = selectedProvince.getProvinceCode();
-            String address = "http://guolin.tech/api/china" + provinceCode;
+            String address = "http://guolin.tech/api/china/" + provinceCode;
             queryFromServer(address, "city");
         }
     }
@@ -197,7 +181,7 @@ public class ChooseAreaFragment extends Fragment implements EasyPermissions.Perm
         } else {
             int provinceCode = selectedProvince.getProvinceCode();
             int cityCode = selectedCity.getCityCode();
-            String address = "http://guolin.tech/api/china" + provinceCode + "/" + cityCode;
+            String address = "http://guolin.tech/api/china/" + provinceCode + "/" + cityCode;
             queryFromServer(address, "county");
         }
     }
@@ -270,15 +254,4 @@ public class ChooseAreaFragment extends Fragment implements EasyPermissions.Perm
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
-    @Override
-    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
-
-    }
-
-    @Override
-    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
-            new AppSettingsDialog.Builder(this).build().show();
-        }
-    }
 }
